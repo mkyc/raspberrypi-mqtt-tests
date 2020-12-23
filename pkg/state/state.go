@@ -1,6 +1,10 @@
 package state
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/binary"
+	"fmt"
+)
 
 type State struct {
 	PIR1 bool
@@ -9,18 +13,24 @@ type State struct {
 	PIR4 bool
 }
 
-func (s State) Serialize() []byte {
-	return []byte(fmt.Sprintf("%b%b%b%b",
-		boolToInt(s.PIR1),
-		boolToInt(s.PIR2),
-		boolToInt(s.PIR3),
-		boolToInt(s.PIR4),
-	))
+func (s State) Serialize() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, s)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
-func boolToInt(b bool) int {
-	if b {
-		return 1
+func (s *State) Deserialize(b []byte) error {
+	buf := bytes.NewReader(b)
+	err := binary.Read(buf, binary.LittleEndian, s)
+	if err != nil {
+		return err
 	}
-	return 0
+	return nil
+}
+
+func (s State) String() string {
+	return fmt.Sprintf("1: %t, 2: %t, 3: %t, 4: %t", s.PIR1, s.PIR2, s.PIR3, s.PIR4)
 }

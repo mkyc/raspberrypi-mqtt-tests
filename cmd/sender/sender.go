@@ -38,8 +38,13 @@ func main() {
 		})
 
 		gobot.Every(1*time.Second, func() {
-			log.Printf("1: %t, 2: %t, 3: %t, 4: %t\n", s.PIR1, s.PIR2, s.PIR3, s.PIR4)
-			mqttAdaptor.Publish(topic, s.Serialize())
+			log.Println(s)
+			b, err := s.Serialize()
+			if err != nil {
+				log.Fatal(err)
+			}
+			mqttAdaptor.Publish(topic, b)
+			log.Println("sent")
 		})
 	}
 
